@@ -53,7 +53,7 @@ class Auth0Mixin(OAuth2Mixin):
 class Auth0LoginHandler(OAuthLoginHandler, Auth0Mixin):
     def get(self):
         buttonScript = requests.get(self.authenticator.webtask_base_url + '?webtask_no_cache=1&client_id=' + self.authenticator.client_id)
-        buttonCss = requests.get(self.authenticator.webtask_base_url + '?css=true')
+        buttonCss = requests.get(self.authenticator.webtask_base_url + '?webtask_no_cache=1&css=true')
 
         self.authenticator.custom_html = Markup("""
           <style>
