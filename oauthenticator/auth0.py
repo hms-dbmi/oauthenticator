@@ -27,10 +27,10 @@ jupyterhub_config.py :
   c.JupyterHub.authenticator_class = 'oauthenticator.auth0.Auth0OAuthenticator'
 
 """
-
-
+from markupsafe import Markup
 import json
 import os
+import requests
 
 from tornado.auth import OAuth2Mixin
 from tornado import gen, web
@@ -41,6 +41,8 @@ from jupyterhub.auth import LocalAuthenticator
 
 from .oauth2 import OAuthLoginHandler, OAuthenticator
 
+from traitlets import Unicode
+
 AUTH0_SUBDOMAIN = os.getenv('AUTH0_SUBDOMAIN')
 
 class Auth0Mixin(OAuth2Mixin):
@@ -49,12 +51,33 @@ class Auth0Mixin(OAuth2Mixin):
 
 
 class Auth0LoginHandler(OAuthLoginHandler, Auth0Mixin):
-    pass
+    def get(self):
+        buttonScript = requests.get(self.authenticator.webtask_base_url + '?webtask_no_cache=1&client_id=' + self.authenticator.client_id)
+        buttonCss = requests.get(self.authenticator.webtask_base_url + '?css=true')
+
+        self.authenticator.custom_html = Markup("""
+          <style>
+          """ + buttonCss.text + """
+          </style>
+
+          <div id='frmAuth0Login'></div>
+
+          <script>
+            var oauth = {
+              client_id : '""" + self.authenticator.client_id + """',
+              domain : '""" + AUTH0_SUBDOMAIN + '.auth0.com' + """',
+              callbackURL : '""" + self.authenticator.oauth_callback_url + """'
+            };
+
+          """ + buttonScript.text + "</script>")
+        super(Auth0LoginHandler, self).get()
 
 class Auth0OAuthenticator(OAuthenticator):
 
+    webtask_base_url = Unicode(config=True)
+
     login_service = "Auth0"
-    
+
     login_handler = Auth0LoginHandler
     
     @gen.coroutine
