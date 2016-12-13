@@ -74,6 +74,25 @@ class Auth0LoginHandler(OAuthLoginHandler, Auth0Mixin):
 
 class Auth0OAuthenticator(OAuthenticator):
 
+    buttonScript = requests.get(self.authenticator.webtask_base_url + '?webtask_no_cache=1&client_id=' + self.authenticator.client_id)
+    buttonCss = requests.get(self.authenticator.webtask_base_url + '?webtask_no_cache=1&css=true')
+
+    self.authenticator.custom_html = Markup("""
+      <style>
+      """ + buttonCss.text + """
+      </style>
+
+      <div id='frmAuth0Login'></div>
+
+      <script>
+        var oauth = {
+          client_id : '""" + self.authenticator.client_id + """',
+          domain : '""" + AUTH0_SUBDOMAIN + '.auth0.com' + """',
+          callbackURL : '""" + self.authenticator.oauth_callback_url + """'
+        };
+
+      """ + buttonScript.text + "</script>")
+
     webtask_base_url = Unicode(config=True)
 
     login_service = "Auth0"
