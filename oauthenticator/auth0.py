@@ -63,8 +63,7 @@ class Auth0LoginHandler(OAuthLoginHandler, Auth0Mixin):
           <div id='frmAuth0Login'></div>
 
           <script>
-            var justNow = new Date (new Date().getTime() - 1);
-            document.cookie = "jupyter-hub-token=; expires=" + justNow.toGMTString();
+            document.cookie = "jupyter-hub-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
 
             var oauth = {
               client_id : '""" + self.authenticator.client_id + """',
