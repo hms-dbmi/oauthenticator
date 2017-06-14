@@ -52,6 +52,7 @@ class Auth0Mixin(OAuth2Mixin):
 
 class Auth0LoginHandler(OAuthLoginHandler, Auth0Mixin):
     def get(self):
+
         buttonScript = requests.get(self.authenticator.webtask_base_url + '?webtask_no_cache=1&client_id=' + self.authenticator.client_id)
         buttonCss = requests.get(self.authenticator.webtask_base_url + '?webtask_no_cache=1&css=true')
 
@@ -63,7 +64,13 @@ class Auth0LoginHandler(OAuthLoginHandler, Auth0Mixin):
           <div id='frmAuth0Login'></div>
 
           <script>
-            document.cookie = "jupyter-hub-token=; Path=/hub/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
+            var cookies = document.cookie.split(";");
+            for(var x = 0; x < cookies.length; x++){
+              document.cookie = cookies[x].split("=")[0]+"=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
+              document.cookie = cookies[x].split("=")[0]+"=; Path=/hub/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
+              document.cookie = cookies[x].split("=")[0]+"=; Path=/; Domain=.harvard.edu; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
+              document.cookie = cookies[x].split("=")[0]+"=; Path=/hub/; Domain=.harvard.edu; Expires=Thu, 01 Jan 1970 00:00:01 GMT;"
+            }
 
             var oauth = {
               client_id : '""" + self.authenticator.client_id + """',
